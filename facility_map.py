@@ -153,67 +153,33 @@ def facility_map(parameters: SkillInput):
             legend_items.append(f'<span style="display:inline-block;width:12px;height:12px;background:{color};border-radius:50%;margin-right:6px;"></span>{key}')
     legend_html = ' &nbsp;&nbsp; '.join(legend_items)
 
-    # Create Highcharts scatter chart configuration (since HighchartsChart doesn't support maps)
-    # Using scatter to plot lat/long coordinates
-    scatter_data = []
+    # Build markers JavaScript array for Leaflet
+    markers_js = []
     for point in map_points:
-        scatter_data.append({
-            "x": point["lon"],
-            "y": point["lat"],
-            "name": point["name"],
-            "color": point["color"],
-            "city": point["city"],
-            "state": point["state"],
-            "building_type": point["building_type"],
-            "building_use": point["building_use"],
-            "own_lease": point["own_lease"],
-            "square_feet": point["square_feet"]
-        })
+        sq_ft = point['square_feet']
+        sq_ft_str = f"{sq_ft:,.0f}" if sq_ft else "N/A"
+        popup = f"<b>{point['name']}</b><br/>{point['city']}, {point['state']}<br/>Type: {point['building_type']}<br/>Use: {point['building_use']}<br/>Ownership: {point['own_lease']}<br/>Sq Ft: {sq_ft_str}"
+        markers_js.append(f"L.circleMarker([{point['lat']}, {point['lon']}], {{radius: 10, fillColor: '{point['color']}', color: '#fff', weight: 2, fillOpacity: 0.8}}).addTo(map).bindPopup('{popup}');")
 
-    map_config = {
-        "chart": {
-            "type": "scatter",
-            "zoomType": "xy"
-        },
-        "title": {
-            "text": ""
-        },
-        "xAxis": {
-            "title": {"text": "Longitude"},
-            "min": -73,
-            "max": -70,
-            "gridLineWidth": 1
-        },
-        "yAxis": {
-            "title": {"text": "Latitude"},
-            "min": 42.5,
-            "max": 43,
-            "gridLineWidth": 1
-        },
-        "tooltip": {
-            "headerFormat": "",
-            "pointFormat": "<b>{point.name}</b><br/>{point.city}, {point.state}<br/>Type: {point.building_type}<br/>Use: {point.building_use}<br/>Ownership: {point.own_lease}<br/>Sq Ft: {point.square_feet:,.0f}"
-        },
-        "plotOptions": {
-            "scatter": {
-                "marker": {
-                    "radius": 10,
-                    "symbol": "circle",
-                    "states": {
-                        "hover": {
-                            "enabled": True,
-                            "lineColor": "rgb(100,100,100)"
-                        }
-                    }
-                }
-            }
-        },
-        "series": [{
-            "name": "Facilities",
-            "colorByPoint": True,
-            "data": scatter_data
-        }]
-    }
+    markers_script = "\n".join(markers_js)
+
+    # Calculate center of all points
+    avg_lat = sum(p['lat'] for p in map_points) / len(map_points)
+    avg_lon = sum(p['lon'] for p in map_points) / len(map_points)
+
+    # Create Leaflet map HTML
+    map_html = f"""
+    <div id="facilityMap" style="height: 500px; width: 100%; border-radius: 8px; margin-bottom: 20px;"></div>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        var map = L.map('facilityMap').setView([{avg_lat}, {avg_lon}], 11);
+        L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png', {{
+            attribution: '© OpenStreetMap contributors'
+        }}).addTo(map);
+        {markers_script}
+    </script>
+    """
 
     # Build summary table
     table_rows = []
@@ -249,11 +215,10 @@ def facility_map(parameters: SkillInput):
                     "style": {"fontSize": "14px", "marginBottom": "20px", "color": "#64748b"}
                 },
                 {
-                    "name": "MapChart",
-                    "type": "HighchartsChart",
+                    "name": "MapContainer",
+                    "type": "Html",
                     "children": "",
-                    "minHeight": "500px",
-                    "options": map_config
+                    "html": map_html
                 },
                 {
                     "name": "TableHeader",
