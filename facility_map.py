@@ -310,7 +310,6 @@ def facility_map(parameters: SkillInput):
 
     # Render layout
     print(f"DEBUG: Layout has {len(layout['layoutJson']['children'])} children")
-    print(f"DEBUG: Map config series: {len(map_config['series'])}")
     print(f"DEBUG: Map points count: {len(map_points)}")
     try:
         html = wire_layout(layout, {})
