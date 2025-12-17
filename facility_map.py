@@ -12,7 +12,7 @@ from skill_framework import skill, SkillParameter, SkillInput, SkillOutput, Skil
 from skill_framework.layouts import wire_layout
 from answer_rocket import AnswerRocketClient
 
-DATABASE_ID = os.getenv('DATABASE_ID', '')
+DATABASE_ID = os.getenv('DATABASE_ID', '3ECBF711-29B5-4C1E-9575-208621747E04')
 
 
 @skill(
