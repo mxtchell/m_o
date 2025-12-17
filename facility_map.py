@@ -153,33 +153,92 @@ def facility_map(parameters: SkillInput):
             legend_items.append(f'<span style="display:inline-block;width:12px;height:12px;background:{color};border-radius:50%;margin-right:6px;"></span>{key}')
     legend_html = ' &nbsp;&nbsp; '.join(legend_items)
 
-    # Build markers JavaScript array for Leaflet
-    markers_js = []
+    # Group facilities by color (building_use) for separate series
+    series_by_color = {}
     for point in map_points:
-        sq_ft = point['square_feet']
-        sq_ft_str = f"{sq_ft:,.0f}" if sq_ft else "N/A"
-        popup = f"<b>{point['name']}</b><br/>{point['city']}, {point['state']}<br/>Type: {point['building_type']}<br/>Use: {point['building_use']}<br/>Ownership: {point['own_lease']}<br/>Sq Ft: {sq_ft_str}"
-        markers_js.append(f"L.circleMarker([{point['lat']}, {point['lon']}], {{radius: 10, fillColor: '{point['color']}', color: '#fff', weight: 2, fillOpacity: 0.8}}).addTo(map).bindPopup('{popup}');")
+        color = point['color']
+        use = point['building_use']
+        if use not in series_by_color:
+            series_by_color[use] = {
+                'name': use,
+                'color': color,
+                'data': []
+            }
+        series_by_color[use]['data'].append({
+            'x': point['lon'],
+            'y': point['lat'],
+            'z': 10,
+            'name': point['name'],
+            'city': point['city'],
+            'state': point['state'],
+            'building_type': point['building_type'],
+            'building_use': point['building_use'],
+            'own_lease': point['own_lease'],
+            'square_feet': point['square_feet']
+        })
 
-    markers_script = "\n".join(markers_js)
+    bubble_series = list(series_by_color.values())
 
-    # Calculate center of all points
-    avg_lat = sum(p['lat'] for p in map_points) / len(map_points)
-    avg_lon = sum(p['lon'] for p in map_points) / len(map_points)
+    # Calculate bounds for axis
+    all_lons = [p['lon'] for p in map_points]
+    all_lats = [p['lat'] for p in map_points]
+    lon_min, lon_max = min(all_lons) - 0.1, max(all_lons) + 0.1
+    lat_min, lat_max = min(all_lats) - 0.05, max(all_lats) + 0.05
 
-    # Create Leaflet map HTML
-    map_html = f"""
-    <div id="facilityMap" style="height: 500px; width: 100%; border-radius: 8px; margin-bottom: 20px;"></div>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-        var map = L.map('facilityMap').setView([{avg_lat}, {avg_lon}], 11);
-        L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png', {{
-            attribution: '© OpenStreetMap contributors'
-        }}).addTo(map);
-        {markers_script}
-    </script>
-    """
+    # Create bubble chart config to simulate map
+    map_config = {
+        "chart": {
+            "type": "bubble",
+            "plotBorderWidth": 1,
+            "zoomType": "xy",
+            "backgroundColor": "#e8f4f8"
+        },
+        "title": {
+            "text": ""
+        },
+        "xAxis": {
+            "title": {"text": ""},
+            "min": lon_min,
+            "max": lon_max,
+            "gridLineWidth": 1,
+            "gridLineColor": "#c8dce8",
+            "labels": {"enabled": False},
+            "tickLength": 0
+        },
+        "yAxis": {
+            "title": {"text": ""},
+            "min": lat_min,
+            "max": lat_max,
+            "gridLineWidth": 1,
+            "gridLineColor": "#c8dce8",
+            "labels": {"enabled": False}
+        },
+        "tooltip": {
+            "useHTML": True,
+            "headerFormat": "",
+            "pointFormat": "<b>{point.name}</b><br/>{point.city}, {point.state}<br/>Type: {point.building_type}<br/>Use: {point.building_use}<br/>Ownership: {point.own_lease}<br/>Sq Ft: {point.square_feet:,.0f}"
+        },
+        "plotOptions": {
+            "bubble": {
+                "minSize": 15,
+                "maxSize": 15,
+                "marker": {
+                    "lineWidth": 2,
+                    "lineColor": "#ffffff"
+                }
+            }
+        },
+        "legend": {
+            "enabled": True,
+            "align": "right",
+            "verticalAlign": "top",
+            "layout": "vertical"
+        },
+        "credits": {
+            "enabled": False
+        },
+        "series": bubble_series
+    }
 
     # Build summary table
     table_rows = []
@@ -215,10 +274,12 @@ def facility_map(parameters: SkillInput):
                     "style": {"fontSize": "14px", "marginBottom": "20px", "color": "#64748b"}
                 },
                 {
-                    "name": "MapContainer",
-                    "type": "Html",
+                    "name": "FacilityMapChart",
+                    "type": "HighchartsChart",
                     "children": "",
-                    "html": map_html
+                    "minHeight": "450px",
+                    "options": map_config,
+                    "extraStyles": "border-radius: 8px; margin-bottom: 20px;"
                 },
                 {
                     "name": "TableHeader",
@@ -311,6 +372,7 @@ def facility_map(parameters: SkillInput):
     # Render layout
     print(f"DEBUG: Layout has {len(layout['layoutJson']['children'])} children")
     print(f"DEBUG: Map points count: {len(map_points)}")
+    print(f"DEBUG: Bubble series count: {len(bubble_series)}")
     try:
         html = wire_layout(layout, {})
         print(f"DEBUG: wire_layout succeeded, HTML length: {len(html)}")
