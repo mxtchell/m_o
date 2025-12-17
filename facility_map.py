@@ -7,10 +7,13 @@ import os
 import json
 import pandas as pd
 from typing import Optional, List
+import logging
 
 from skill_framework import skill, SkillParameter, SkillInput, SkillOutput, SkillVisualization
 from skill_framework.layouts import wire_layout
 from answer_rocket import AnswerRocketClient
+
+logger = logging.getLogger(__name__)
 
 DATABASE_ID = os.getenv('DATABASE_ID', '3ECBF711-29B5-4C1E-9575-208621747E04')
 
@@ -223,10 +226,10 @@ def facility_map(parameters: SkillInput):
                 },
                 {
                     "name": "MapChart",
-                    "type": "HighchartsWidget",
-                    "style": {"height": "500px", "marginBottom": "30px"},
-                    "chartType": "Map",
-                    "config": map_config
+                    "type": "HighchartsChart",
+                    "children": "",
+                    "minHeight": "500px",
+                    "options": map_config
                 },
                 {
                     "name": "TableHeader",
@@ -236,43 +239,97 @@ def facility_map(parameters: SkillInput):
                 },
                 {
                     "name": "FacilityTable",
-                    "type": "Container",
-                    "style": {"display": "grid", "gridTemplateColumns": "2fr 1fr 0.5fr 1fr 1fr 1fr 1fr", "gap": "0", "border": "1px solid #e2e8f0", "borderRadius": "8px", "overflow": "hidden"},
-                    "children": [
-                        # Table header
-                        {"type": "Paragraph", "text": "Building Name", "style": {"padding": "12px", "fontWeight": "bold", "backgroundColor": "#f8fafc", "borderBottom": "2px solid #e2e8f0"}},
-                        {"type": "Paragraph", "text": "City", "style": {"padding": "12px", "fontWeight": "bold", "backgroundColor": "#f8fafc", "borderBottom": "2px solid #e2e8f0"}},
-                        {"type": "Paragraph", "text": "State", "style": {"padding": "12px", "fontWeight": "bold", "backgroundColor": "#f8fafc", "borderBottom": "2px solid #e2e8f0"}},
-                        {"type": "Paragraph", "text": "Type", "style": {"padding": "12px", "fontWeight": "bold", "backgroundColor": "#f8fafc", "borderBottom": "2px solid #e2e8f0"}},
-                        {"type": "Paragraph", "text": "Use", "style": {"padding": "12px", "fontWeight": "bold", "backgroundColor": "#f8fafc", "borderBottom": "2px solid #e2e8f0"}},
-                        {"type": "Paragraph", "text": "Ownership", "style": {"padding": "12px", "fontWeight": "bold", "backgroundColor": "#f8fafc", "borderBottom": "2px solid #e2e8f0"}},
-                        {"type": "Paragraph", "text": "Sq Ft", "style": {"padding": "12px", "fontWeight": "bold", "backgroundColor": "#f8fafc", "borderBottom": "2px solid #e2e8f0", "textAlign": "right"}}
-                    ]
+                    "type": "FlexContainer",
+                    "children": "",
+                    "direction": "column",
+                    "extraStyles": "display: grid; grid-template-columns: 2fr 1fr 0.5fr 1fr 1fr 1fr 1fr; gap: 0; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;"
+                },
+                {
+                    "name": "TH_Name",
+                    "type": "Paragraph",
+                    "children": "",
+                    "text": "Building Name",
+                    "parentId": "FacilityTable",
+                    "style": {"padding": "12px", "fontWeight": "bold", "backgroundColor": "#f8fafc", "borderBottom": "2px solid #e2e8f0"}
+                },
+                {
+                    "name": "TH_City",
+                    "type": "Paragraph",
+                    "children": "",
+                    "text": "City",
+                    "parentId": "FacilityTable",
+                    "style": {"padding": "12px", "fontWeight": "bold", "backgroundColor": "#f8fafc", "borderBottom": "2px solid #e2e8f0"}
+                },
+                {
+                    "name": "TH_State",
+                    "type": "Paragraph",
+                    "children": "",
+                    "text": "State",
+                    "parentId": "FacilityTable",
+                    "style": {"padding": "12px", "fontWeight": "bold", "backgroundColor": "#f8fafc", "borderBottom": "2px solid #e2e8f0"}
+                },
+                {
+                    "name": "TH_Type",
+                    "type": "Paragraph",
+                    "children": "",
+                    "text": "Type",
+                    "parentId": "FacilityTable",
+                    "style": {"padding": "12px", "fontWeight": "bold", "backgroundColor": "#f8fafc", "borderBottom": "2px solid #e2e8f0"}
+                },
+                {
+                    "name": "TH_Use",
+                    "type": "Paragraph",
+                    "children": "",
+                    "text": "Use",
+                    "parentId": "FacilityTable",
+                    "style": {"padding": "12px", "fontWeight": "bold", "backgroundColor": "#f8fafc", "borderBottom": "2px solid #e2e8f0"}
+                },
+                {
+                    "name": "TH_Ownership",
+                    "type": "Paragraph",
+                    "children": "",
+                    "text": "Ownership",
+                    "parentId": "FacilityTable",
+                    "style": {"padding": "12px", "fontWeight": "bold", "backgroundColor": "#f8fafc", "borderBottom": "2px solid #e2e8f0"}
+                },
+                {
+                    "name": "TH_SqFt",
+                    "type": "Paragraph",
+                    "children": "",
+                    "text": "Sq Ft",
+                    "parentId": "FacilityTable",
+                    "style": {"padding": "12px", "fontWeight": "bold", "backgroundColor": "#f8fafc", "borderBottom": "2px solid #e2e8f0", "textAlign": "right"}
                 }
             ]
         },
         "inputVariables": []
     }
 
-    # Add table rows
+    # Add table rows dynamically
     for i, row in enumerate(table_rows):
         bg_color = "#ffffff" if i % 2 == 0 else "#f8fafc"
         border_style = "1px solid #e2e8f0"
-        layout["layoutJson"]["children"][4]["children"].extend([
-            {"type": "Paragraph", "text": row["name"], "style": {"padding": "10px 12px", "backgroundColor": bg_color, "borderBottom": border_style, "fontSize": "14px"}},
-            {"type": "Paragraph", "text": row["city"], "style": {"padding": "10px 12px", "backgroundColor": bg_color, "borderBottom": border_style, "fontSize": "14px"}},
-            {"type": "Paragraph", "text": row["state"], "style": {"padding": "10px 12px", "backgroundColor": bg_color, "borderBottom": border_style, "fontSize": "14px"}},
-            {"type": "Paragraph", "text": row["type"], "style": {"padding": "10px 12px", "backgroundColor": bg_color, "borderBottom": border_style, "fontSize": "14px"}},
-            {"type": "Paragraph", "text": row["use"], "style": {"padding": "10px 12px", "backgroundColor": bg_color, "borderBottom": border_style, "fontSize": "14px"}},
-            {"type": "Paragraph", "text": row["ownership"], "style": {"padding": "10px 12px", "backgroundColor": bg_color, "borderBottom": border_style, "fontSize": "14px"}},
-            {"type": "Paragraph", "text": row["sq_ft"], "style": {"padding": "10px 12px", "backgroundColor": bg_color, "borderBottom": border_style, "fontSize": "14px", "textAlign": "right"}}
+        layout["layoutJson"]["children"].extend([
+            {"name": f"TD_Name_{i}", "type": "Paragraph", "children": "", "text": row["name"], "parentId": "FacilityTable", "style": {"padding": "10px 12px", "backgroundColor": bg_color, "borderBottom": border_style, "fontSize": "14px"}},
+            {"name": f"TD_City_{i}", "type": "Paragraph", "children": "", "text": row["city"], "parentId": "FacilityTable", "style": {"padding": "10px 12px", "backgroundColor": bg_color, "borderBottom": border_style, "fontSize": "14px"}},
+            {"name": f"TD_State_{i}", "type": "Paragraph", "children": "", "text": row["state"], "parentId": "FacilityTable", "style": {"padding": "10px 12px", "backgroundColor": bg_color, "borderBottom": border_style, "fontSize": "14px"}},
+            {"name": f"TD_Type_{i}", "type": "Paragraph", "children": "", "text": row["type"], "parentId": "FacilityTable", "style": {"padding": "10px 12px", "backgroundColor": bg_color, "borderBottom": border_style, "fontSize": "14px"}},
+            {"name": f"TD_Use_{i}", "type": "Paragraph", "children": "", "text": row["use"], "parentId": "FacilityTable", "style": {"padding": "10px 12px", "backgroundColor": bg_color, "borderBottom": border_style, "fontSize": "14px"}},
+            {"name": f"TD_Ownership_{i}", "type": "Paragraph", "children": "", "text": row["ownership"], "parentId": "FacilityTable", "style": {"padding": "10px 12px", "backgroundColor": bg_color, "borderBottom": border_style, "fontSize": "14px"}},
+            {"name": f"TD_SqFt_{i}", "type": "Paragraph", "children": "", "text": row["sq_ft"], "parentId": "FacilityTable", "style": {"padding": "10px 12px", "backgroundColor": bg_color, "borderBottom": border_style, "fontSize": "14px", "textAlign": "right"}}
         ])
 
     # Render layout
+    print(f"DEBUG: Layout has {len(layout['layoutJson']['children'])} children")
+    print(f"DEBUG: Map config series: {len(map_config['series'])}")
+    print(f"DEBUG: Map points count: {len(map_points)}")
     try:
         html = wire_layout(layout, {})
+        print(f"DEBUG: wire_layout succeeded, HTML length: {len(html)}")
     except Exception as e:
         print(f"DEBUG: wire_layout failed: {e}")
+        import traceback
+        traceback.print_exc()
         html = f"<div>Error rendering layout: {e}</div>"
 
     # Summary for chat response
