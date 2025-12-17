@@ -153,41 +153,65 @@ def facility_map(parameters: SkillInput):
             legend_items.append(f'<span style="display:inline-block;width:12px;height:12px;background:{color};border-radius:50%;margin-right:6px;"></span>{key}')
     legend_html = ' &nbsp;&nbsp; '.join(legend_items)
 
-    # Create Highcharts map configuration
+    # Create Highcharts scatter chart configuration (since HighchartsChart doesn't support maps)
+    # Using scatter to plot lat/long coordinates
+    scatter_data = []
+    for point in map_points:
+        scatter_data.append({
+            "x": point["lon"],
+            "y": point["lat"],
+            "name": point["name"],
+            "color": point["color"],
+            "city": point["city"],
+            "state": point["state"],
+            "building_type": point["building_type"],
+            "building_use": point["building_use"],
+            "own_lease": point["own_lease"],
+            "square_feet": point["square_feet"]
+        })
+
     map_config = {
         "chart": {
-            "map": "countries/us/us-all"
+            "type": "scatter",
+            "zoomType": "xy"
         },
         "title": {
             "text": ""
         },
-        "mapNavigation": {
-            "enabled": True,
-            "buttonOptions": {
-                "verticalAlign": "bottom"
-            }
+        "xAxis": {
+            "title": {"text": "Longitude"},
+            "min": -73,
+            "max": -70,
+            "gridLineWidth": 1
+        },
+        "yAxis": {
+            "title": {"text": "Latitude"},
+            "min": 42.5,
+            "max": 43,
+            "gridLineWidth": 1
         },
         "tooltip": {
             "headerFormat": "",
             "pointFormat": "<b>{point.name}</b><br/>{point.city}, {point.state}<br/>Type: {point.building_type}<br/>Use: {point.building_use}<br/>Ownership: {point.own_lease}<br/>Sq Ft: {point.square_feet:,.0f}"
         },
-        "series": [{
-            "name": "US States",
-            "borderColor": "#A0A0A0",
-            "nullColor": "rgba(200, 200, 200, 0.3)",
-            "showInLegend": False
-        }, {
-            "type": "mappoint",
-            "name": "Facilities",
-            "color": "#3b82f6",
-            "data": map_points,
-            "marker": {
-                "radius": 8,
-                "symbol": "circle"
-            },
-            "dataLabels": {
-                "enabled": False
+        "plotOptions": {
+            "scatter": {
+                "marker": {
+                    "radius": 10,
+                    "symbol": "circle",
+                    "states": {
+                        "hover": {
+                            "enabled": True,
+                            "lineColor": "rgb(100,100,100)"
+                        }
+                    }
+                }
             }
+        },
+        "series": [{
+            "name": "Facilities",
+            "colorByPoint": True,
+            "data": scatter_data
         }]
     }
 
