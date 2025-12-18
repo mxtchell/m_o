@@ -221,8 +221,24 @@ def facility_map(parameters: SkillInput):
         },
         "mapNavigation": {
             "enabled": True,
+            "enableMouseWheelZoom": True,
+            "enableDoubleClickZoom": True,
             "buttonOptions": {
                 "verticalAlign": "bottom"
+            }
+        },
+        "drilldown": {
+            "activeDataLabelStyle": {
+                "color": "#FFFFFF",
+                "textDecoration": "none",
+                "textOutline": "1px #000000"
+            },
+            "drillUpButton": {
+                "relativeTo": "spacingBox",
+                "position": {
+                    "x": 0,
+                    "y": 60
+                }
             }
         },
         "tooltip": {
