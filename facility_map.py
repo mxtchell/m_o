@@ -213,6 +213,7 @@ def facility_map(parameters: SkillInput):
     # Highcharts Maps configuration
     map_config = {
         "chart": {
+            "type": "map",
             "map": "countries/us/us-all"
         },
         "title": {
@@ -248,6 +249,11 @@ def facility_map(parameters: SkillInput):
 
     print(f"DEBUG: Map config chart type: {map_config.get('chart', {})}")
     print(f"DEBUG: Number of series: {len(map_config['series'])}")
+    print(f"DEBUG: First series: {map_config['series'][0]}")
+    if len(map_config['series']) > 1:
+        print(f"DEBUG: Second series type: {map_config['series'][1].get('type', 'no type')}")
+        print(f"DEBUG: Second series data count: {len(map_config['series'][1].get('data', []))}")
+    print(f"DEBUG: Full map_config JSON: {json.dumps(map_config, indent=2)[:2000]}...")
 
     # Build summary table
     table_rows = []
