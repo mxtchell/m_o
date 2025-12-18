@@ -185,48 +185,49 @@ def facility_map(parameters: SkillInput):
     lon_min, lon_max = min(all_lons) - 0.1, max(all_lons) + 0.1
     lat_min, lat_max = min(all_lats) - 0.05, max(all_lats) + 0.05
 
-    # Create bubble chart config to simulate map
+    # Build mappoint series for Highcharts Maps
+    map_series_data = []
+    for use, series_data in series_by_color.items():
+        map_series_data.append({
+            "type": "mappoint",
+            "name": use,
+            "color": series_data['color'],
+            "data": [{
+                "name": p['name'],
+                "lat": p['y'],
+                "lon": p['x'],
+                "city": p.get('city', ''),
+                "state": p.get('state', ''),
+                "building_type": p.get('building_type', ''),
+                "building_use": p.get('building_use', ''),
+                "own_lease": p.get('own_lease', ''),
+                "square_feet": p.get('square_feet', 0)
+            } for p in series_data['data']],
+            "marker": {
+                "radius": 8,
+                "lineWidth": 2,
+                "lineColor": "#ffffff"
+            }
+        })
+
+    # Highcharts Maps configuration
     map_config = {
         "chart": {
-            "type": "bubble",
-            "plotBorderWidth": 1,
-            "zoomType": "xy",
-            "backgroundColor": "#e8f4f8"
+            "map": "countries/us/us-all"
         },
         "title": {
             "text": ""
         },
-        "xAxis": {
-            "title": {"text": ""},
-            "min": lon_min,
-            "max": lon_max,
-            "gridLineWidth": 1,
-            "gridLineColor": "#c8dce8",
-            "labels": {"enabled": False},
-            "tickLength": 0
-        },
-        "yAxis": {
-            "title": {"text": ""},
-            "min": lat_min,
-            "max": lat_max,
-            "gridLineWidth": 1,
-            "gridLineColor": "#c8dce8",
-            "labels": {"enabled": False}
+        "mapNavigation": {
+            "enabled": True,
+            "buttonOptions": {
+                "verticalAlign": "bottom"
+            }
         },
         "tooltip": {
             "useHTML": True,
             "headerFormat": "",
             "pointFormat": "<b>{point.name}</b><br/>{point.city}, {point.state}<br/>Type: {point.building_type}<br/>Use: {point.building_use}<br/>Ownership: {point.own_lease}<br/>Sq Ft: {point.square_feet:,.0f}"
-        },
-        "plotOptions": {
-            "bubble": {
-                "minSize": 15,
-                "maxSize": 15,
-                "marker": {
-                    "lineWidth": 2,
-                    "lineColor": "#ffffff"
-                }
-            }
         },
         "legend": {
             "enabled": True,
@@ -237,8 +238,16 @@ def facility_map(parameters: SkillInput):
         "credits": {
             "enabled": False
         },
-        "series": bubble_series
+        "series": [{
+            "name": "US States",
+            "borderColor": "#A0A0A0",
+            "nullColor": "rgba(200, 200, 200, 0.3)",
+            "showInLegend": False
+        }] + map_series_data
     }
+
+    print(f"DEBUG: Map config chart type: {map_config.get('chart', {})}")
+    print(f"DEBUG: Number of series: {len(map_config['series'])}")
 
     # Build summary table
     table_rows = []
