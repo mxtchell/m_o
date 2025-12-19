@@ -227,20 +227,6 @@ def facility_map(parameters: SkillInput):
                 "verticalAlign": "bottom"
             }
         },
-        "drilldown": {
-            "activeDataLabelStyle": {
-                "color": "#FFFFFF",
-                "textDecoration": "none",
-                "textOutline": "1px #000000"
-            },
-            "drillUpButton": {
-                "relativeTo": "spacingBox",
-                "position": {
-                    "x": 0,
-                    "y": 60
-                }
-            }
-        },
         "tooltip": {
             "useHTML": True,
             "headerFormat": "",
@@ -263,13 +249,7 @@ def facility_map(parameters: SkillInput):
         }] + map_series_data
     }
 
-    print(f"DEBUG: Map config chart type: {map_config.get('chart', {})}")
-    print(f"DEBUG: Number of series: {len(map_config['series'])}")
-    print(f"DEBUG: First series: {map_config['series'][0]}")
-    if len(map_config['series']) > 1:
-        print(f"DEBUG: Second series type: {map_config['series'][1].get('type', 'no type')}")
-        print(f"DEBUG: Second series data count: {len(map_config['series'][1].get('data', []))}")
-    print(f"DEBUG: Full map_config JSON: {json.dumps(map_config, indent=2)[:2000]}...")
+    print(f"DEBUG: Map with {len(map_config['series'])} series, {len(map_points)} facilities")
 
     # Build summary table
     table_rows = []
