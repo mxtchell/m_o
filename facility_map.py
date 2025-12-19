@@ -315,63 +315,93 @@ def facility_map(parameters: SkillInput):
                     "style": {"fontSize": "18px", "fontWeight": "bold", "marginBottom": "15px", "color": "#1e293b"}
                 },
                 {
-                    "name": "TableWrapper",
+                    "name": "TableScrollWrapper",
                     "type": "FlexContainer",
                     "children": "",
                     "direction": "column",
-                    "extraStyles": "border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;"
+                    "extraStyles": "max-height: 400px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px;"
                 },
                 {
-                    "name": "TableHeaderRow",
+                    "name": "FacilityTable",
                     "type": "FlexContainer",
                     "children": "",
-                    "parentId": "TableWrapper",
-                    "direction": "row",
-                    "extraStyles": "display: grid; grid-template-columns: 2fr 1fr 0.5fr 1fr 1fr 1fr 1fr; background-color: #f8fafc; border-bottom: 2px solid #e2e8f0;"
-                },
-                {"name": "TH_Name", "type": "Paragraph", "children": "", "text": "Building Name", "parentId": "TableHeaderRow", "style": {"padding": "12px", "fontWeight": "bold"}},
-                {"name": "TH_City", "type": "Paragraph", "children": "", "text": "City", "parentId": "TableHeaderRow", "style": {"padding": "12px", "fontWeight": "bold"}},
-                {"name": "TH_State", "type": "Paragraph", "children": "", "text": "State", "parentId": "TableHeaderRow", "style": {"padding": "12px", "fontWeight": "bold"}},
-                {"name": "TH_Type", "type": "Paragraph", "children": "", "text": "Type", "parentId": "TableHeaderRow", "style": {"padding": "12px", "fontWeight": "bold"}},
-                {"name": "TH_Use", "type": "Paragraph", "children": "", "text": "Use", "parentId": "TableHeaderRow", "style": {"padding": "12px", "fontWeight": "bold"}},
-                {"name": "TH_Ownership", "type": "Paragraph", "children": "", "text": "Ownership", "parentId": "TableHeaderRow", "style": {"padding": "12px", "fontWeight": "bold"}},
-                {"name": "TH_SqFt", "type": "Paragraph", "children": "", "text": "Sq Ft", "parentId": "TableHeaderRow", "style": {"padding": "12px", "fontWeight": "bold", "textAlign": "right"}},
-                {
-                    "name": "TableBody",
-                    "type": "FlexContainer",
-                    "children": "",
-                    "parentId": "TableWrapper",
+                    "parentId": "TableScrollWrapper",
                     "direction": "column",
-                    "extraStyles": "max-height: 400px; overflow-y: auto;"
+                    "extraStyles": "display: grid; grid-template-columns: 2fr 1fr 0.5fr 1fr 1fr 1fr 1fr; gap: 0;"
+                },
+                {
+                    "name": "TH_Name",
+                    "type": "Paragraph",
+                    "children": "",
+                    "text": "Building Name",
+                    "parentId": "FacilityTable",
+                    "style": {"padding": "12px", "fontWeight": "bold", "backgroundColor": "#f8fafc", "borderBottom": "2px solid #e2e8f0"}
+                },
+                {
+                    "name": "TH_City",
+                    "type": "Paragraph",
+                    "children": "",
+                    "text": "City",
+                    "parentId": "FacilityTable",
+                    "style": {"padding": "12px", "fontWeight": "bold", "backgroundColor": "#f8fafc", "borderBottom": "2px solid #e2e8f0"}
+                },
+                {
+                    "name": "TH_State",
+                    "type": "Paragraph",
+                    "children": "",
+                    "text": "State",
+                    "parentId": "FacilityTable",
+                    "style": {"padding": "12px", "fontWeight": "bold", "backgroundColor": "#f8fafc", "borderBottom": "2px solid #e2e8f0"}
+                },
+                {
+                    "name": "TH_Type",
+                    "type": "Paragraph",
+                    "children": "",
+                    "text": "Type",
+                    "parentId": "FacilityTable",
+                    "style": {"padding": "12px", "fontWeight": "bold", "backgroundColor": "#f8fafc", "borderBottom": "2px solid #e2e8f0"}
+                },
+                {
+                    "name": "TH_Use",
+                    "type": "Paragraph",
+                    "children": "",
+                    "text": "Use",
+                    "parentId": "FacilityTable",
+                    "style": {"padding": "12px", "fontWeight": "bold", "backgroundColor": "#f8fafc", "borderBottom": "2px solid #e2e8f0"}
+                },
+                {
+                    "name": "TH_Ownership",
+                    "type": "Paragraph",
+                    "children": "",
+                    "text": "Ownership",
+                    "parentId": "FacilityTable",
+                    "style": {"padding": "12px", "fontWeight": "bold", "backgroundColor": "#f8fafc", "borderBottom": "2px solid #e2e8f0"}
+                },
+                {
+                    "name": "TH_SqFt",
+                    "type": "Paragraph",
+                    "children": "",
+                    "text": "Sq Ft",
+                    "parentId": "FacilityTable",
+                    "style": {"padding": "12px", "fontWeight": "bold", "backgroundColor": "#f8fafc", "borderBottom": "2px solid #e2e8f0", "textAlign": "right"}
                 }
             ]
         },
         "inputVariables": []
     }
 
-    # Add table rows dynamically to the scrollable body
+    # Add table rows dynamically
     for i, row in enumerate(table_rows):
         bg_color = "#ffffff" if i % 2 == 0 else "#f8fafc"
         border_style = "1px solid #e2e8f0"
-
-        # Each row is a grid container
-        layout["layoutJson"]["children"].append({
-            "name": f"TR_{i}",
-            "type": "FlexContainer",
-            "children": "",
-            "parentId": "TableBody",
-            "direction": "row",
-            "extraStyles": f"display: grid; grid-template-columns: 2fr 1fr 0.5fr 1fr 1fr 1fr 1fr; background-color: {bg_color}; border-bottom: {border_style};"
-        })
-
         layout["layoutJson"]["children"].extend([
-            {"name": f"TD_Name_{i}", "type": "Paragraph", "children": "", "text": row["name"], "parentId": f"TR_{i}", "style": {"padding": "10px 12px", "fontSize": "14px"}},
-            {"name": f"TD_City_{i}", "type": "Paragraph", "children": "", "text": row["city"], "parentId": f"TR_{i}", "style": {"padding": "10px 12px", "fontSize": "14px"}},
-            {"name": f"TD_State_{i}", "type": "Paragraph", "children": "", "text": row["state"], "parentId": f"TR_{i}", "style": {"padding": "10px 12px", "fontSize": "14px"}},
-            {"name": f"TD_Type_{i}", "type": "Paragraph", "children": "", "text": row["type"], "parentId": f"TR_{i}", "style": {"padding": "10px 12px", "fontSize": "14px"}},
-            {"name": f"TD_Use_{i}", "type": "Paragraph", "children": "", "text": row["use"], "parentId": f"TR_{i}", "style": {"padding": "10px 12px", "fontSize": "14px"}},
-            {"name": f"TD_Ownership_{i}", "type": "Paragraph", "children": "", "text": row["ownership"], "parentId": f"TR_{i}", "style": {"padding": "10px 12px", "fontSize": "14px"}},
-            {"name": f"TD_SqFt_{i}", "type": "Paragraph", "children": "", "text": row["sq_ft"], "parentId": f"TR_{i}", "style": {"padding": "10px 12px", "fontSize": "14px", "textAlign": "right"}}
+            {"name": f"TD_Name_{i}", "type": "Paragraph", "children": "", "text": row["name"], "parentId": "FacilityTable", "style": {"padding": "10px 12px", "backgroundColor": bg_color, "borderBottom": border_style, "fontSize": "14px"}},
+            {"name": f"TD_City_{i}", "type": "Paragraph", "children": "", "text": row["city"], "parentId": "FacilityTable", "style": {"padding": "10px 12px", "backgroundColor": bg_color, "borderBottom": border_style, "fontSize": "14px"}},
+            {"name": f"TD_State_{i}", "type": "Paragraph", "children": "", "text": row["state"], "parentId": "FacilityTable", "style": {"padding": "10px 12px", "backgroundColor": bg_color, "borderBottom": border_style, "fontSize": "14px"}},
+            {"name": f"TD_Type_{i}", "type": "Paragraph", "children": "", "text": row["type"], "parentId": "FacilityTable", "style": {"padding": "10px 12px", "backgroundColor": bg_color, "borderBottom": border_style, "fontSize": "14px"}},
+            {"name": f"TD_Use_{i}", "type": "Paragraph", "children": "", "text": row["use"], "parentId": "FacilityTable", "style": {"padding": "10px 12px", "backgroundColor": bg_color, "borderBottom": border_style, "fontSize": "14px"}},
+            {"name": f"TD_Ownership_{i}", "type": "Paragraph", "children": "", "text": row["ownership"], "parentId": "FacilityTable", "style": {"padding": "10px 12px", "backgroundColor": bg_color, "borderBottom": border_style, "fontSize": "14px"}},
+            {"name": f"TD_SqFt_{i}", "type": "Paragraph", "children": "", "text": row["sq_ft"], "parentId": "FacilityTable", "style": {"padding": "10px 12px", "backgroundColor": bg_color, "borderBottom": border_style, "fontSize": "14px", "textAlign": "right"}}
         ])
 
     # Render layout
