@@ -35,6 +35,21 @@ DATABASE_ID = os.getenv('DATABASE_ID', '3ECBF711-29B5-4C1E-9575-208621747E04')
             constrained_values=["building_use", "own_lease", "building_type", "state"],
             description="Dimension to color-code markers by",
             default_value="building_use"
+        ),
+        SkillParameter(
+            name="insight_prompt",
+            parameter_type="prompt",
+            description="Prompt for generating facility insights narrative",
+            default_value="""Analyze this facility portfolio data and provide strategic insights:
+
+{{facts}}
+
+Provide a brief analysis covering:
+1. **Portfolio Overview** - Geographic distribution and facility mix
+2. **Key Observations** - Notable patterns in ownership, building types, or utilization
+3. **Strategic Considerations** - Any insights for facility planning
+
+Use markdown formatting. **Limit response to 200 words maximum.**"""
         )
     ]
 )
@@ -43,6 +58,7 @@ def facility_map(parameters: SkillInput):
 
     filters = parameters.arguments.other_filters or []
     color_by = parameters.arguments.color_by or "building_use"
+    insight_prompt_template = parameters.arguments.insight_prompt
 
     # Query facility data
     sql_query = """
@@ -393,16 +409,58 @@ def facility_map(parameters: SkillInput):
         traceback.print_exc()
         html = f"<div>Error rendering layout: {e}</div>"
 
-    # Summary for chat response
+    # Build facts for insight prompt
+    facts_parts = []
+    facts_parts.append(f"**Total Facilities:** {len(df)}")
+
+    if 'BUILDING_USE' in df.columns:
+        use_counts = df['BUILDING_USE'].value_counts().to_dict()
+        facts_parts.append(f"**By Building Use:** " + ", ".join([f"{use}: {count}" for use, count in use_counts.items()]))
+
+    if 'OWN_LEASE' in df.columns:
+        own_counts = df['OWN_LEASE'].value_counts().to_dict()
+        facts_parts.append(f"**By Ownership:** " + ", ".join([f"{own}: {count}" for own, count in own_counts.items()]))
+
+    if 'STATE' in df.columns:
+        state_counts = df['STATE'].value_counts().to_dict()
+        facts_parts.append(f"**By State:** " + ", ".join([f"{state}: {count}" for state, count in state_counts.items()]))
+
+    if 'BUILDING_TYPE' in df.columns:
+        type_counts = df['BUILDING_TYPE'].value_counts().to_dict()
+        facts_parts.append(f"**By Building Type:** " + ", ".join([f"{btype}: {count}" for btype, count in type_counts.items()]))
+
+    if 'SQUARE_FEET' in df.columns:
+        total_sqft = df['SQUARE_FEET'].sum()
+        avg_sqft = df['SQUARE_FEET'].mean()
+        facts_parts.append(f"**Total Square Feet:** {total_sqft:,.0f}")
+        facts_parts.append(f"**Average Square Feet:** {avg_sqft:,.0f}")
+
+    facts = "\n".join(facts_parts)
+
+    # Summary for chat response (left panel)
     summary = f"Showing {len(df)} facilities on the map. "
     if 'BUILDING_USE' in df.columns:
         use_counts = df['BUILDING_USE'].value_counts().to_dict()
         use_summary = ", ".join([f"{count} {use}" for use, count in use_counts.items()])
         summary += f"By use: {use_summary}."
 
+    # Generate narrative using LLM
+    import jinja2
+    from ar_analytics import ArUtils
+
+    try:
+        rendered_insight_prompt = jinja2.Template(insight_prompt_template).render(facts=facts)
+        ar_utils = ArUtils()
+        detailed_narrative = ar_utils.get_llm_response(rendered_insight_prompt)
+        if not detailed_narrative:
+            detailed_narrative = f"## Facility Portfolio Overview\n\n{facts}"
+    except Exception as e:
+        print(f"DEBUG: Insight generation failed: {e}")
+        detailed_narrative = f"## Facility Portfolio Overview\n\n{facts}"
+
     return SkillOutput(
         final_prompt=summary,
-        narrative=None,
+        narrative=detailed_narrative,
         visualizations=[
             SkillVisualization(title="Facility Map", layout=html)
         ]
