@@ -315,8 +315,16 @@ def facility_map(parameters: SkillInput):
                     "style": {"fontSize": "18px", "fontWeight": "bold", "marginBottom": "15px", "color": "#1e293b"}
                 },
                 {
+                    "name": "TableScrollContainer",
+                    "type": "FlexContainer",
+                    "children": "",
+                    "direction": "column",
+                    "extraStyles": "max-height: 400px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px;"
+                },
+                {
                     "name": "FacilityDataTable",
                     "type": "DataTable",
+                    "parentId": "TableScrollContainer",
                     "columns": [
                         {"name": "Building Name"},
                         {"name": "City"},
