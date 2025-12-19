@@ -315,53 +315,41 @@ def facility_map(parameters: SkillInput):
                     "style": {"fontSize": "18px", "fontWeight": "bold", "marginBottom": "15px", "color": "#1e293b"}
                 },
                 {
-                    "name": "TableContainer",
-                    "type": "Html",
-                    "html": ""
+                    "name": "FacilityDataTable",
+                    "type": "DataTable",
+                    "columns": [
+                        {"name": "Building Name"},
+                        {"name": "City"},
+                        {"name": "State"},
+                        {"name": "Type"},
+                        {"name": "Use"},
+                        {"name": "Ownership"},
+                        {"name": "Sq Ft"}
+                    ],
+                    "data": []
                 }
             ]
         },
         "inputVariables": []
     }
 
-    # Build HTML table with single scroll
-    table_html = '''<div style="max-height: 400px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
-        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-            <thead style="position: sticky; top: 0; background: #f8fafc;">
-                <tr>
-                    <th style="padding: 12px; font-weight: bold; text-align: left; border-bottom: 2px solid #e2e8f0;">Building Name</th>
-                    <th style="padding: 12px; font-weight: bold; text-align: left; border-bottom: 2px solid #e2e8f0;">City</th>
-                    <th style="padding: 12px; font-weight: bold; text-align: left; border-bottom: 2px solid #e2e8f0;">State</th>
-                    <th style="padding: 12px; font-weight: bold; text-align: left; border-bottom: 2px solid #e2e8f0;">Type</th>
-                    <th style="padding: 12px; font-weight: bold; text-align: left; border-bottom: 2px solid #e2e8f0;">Use</th>
-                    <th style="padding: 12px; font-weight: bold; text-align: left; border-bottom: 2px solid #e2e8f0;">Ownership</th>
-                    <th style="padding: 12px; font-weight: bold; text-align: right; border-bottom: 2px solid #e2e8f0;">Sq Ft</th>
-                </tr>
-            </thead>
-            <tbody>'''
+    # Build table data for DataTable
+    table_data = []
+    for row in table_rows:
+        table_data.append([
+            row["name"],
+            row["city"],
+            row["state"],
+            row["type"],
+            row["use"],
+            row["ownership"],
+            row["sq_ft"]
+        ])
 
-    for i, row in enumerate(table_rows):
-        bg_color = "#ffffff" if i % 2 == 0 else "#f8fafc"
-        table_html += f'''
-                <tr style="background-color: {bg_color};">
-                    <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0;">{row["name"]}</td>
-                    <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0;">{row["city"]}</td>
-                    <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0;">{row["state"]}</td>
-                    <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0;">{row["type"]}</td>
-                    <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0;">{row["use"]}</td>
-                    <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0;">{row["ownership"]}</td>
-                    <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; text-align: right;">{row["sq_ft"]}</td>
-                </tr>'''
-
-    table_html += '''
-            </tbody>
-        </table>
-    </div>'''
-
-    # Update the TableContainer with the HTML
+    # Update the DataTable with the data
     for child in layout["layoutJson"]["children"]:
-        if child.get("name") == "TableContainer":
-            child["html"] = table_html
+        if child.get("name") == "FacilityDataTable":
+            child["data"] = table_data
             break
 
     # Render layout
