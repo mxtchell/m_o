@@ -315,94 +315,54 @@ def facility_map(parameters: SkillInput):
                     "style": {"fontSize": "18px", "fontWeight": "bold", "marginBottom": "15px", "color": "#1e293b"}
                 },
                 {
-                    "name": "TableScrollWrapper",
-                    "type": "FlexContainer",
-                    "children": "",
-                    "direction": "column",
-                    "extraStyles": "max-height: 400px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px;"
-                },
-                {
-                    "name": "FacilityTable",
-                    "type": "FlexContainer",
-                    "children": "",
-                    "parentId": "TableScrollWrapper",
-                    "direction": "column",
-                    "extraStyles": "display: grid; grid-template-columns: 2fr 1fr 0.5fr 1fr 1fr 1fr 1fr; gap: 0;"
-                },
-                {
-                    "name": "TH_Name",
-                    "type": "Paragraph",
-                    "children": "",
-                    "text": "Building Name",
-                    "parentId": "FacilityTable",
-                    "style": {"padding": "12px", "fontWeight": "bold", "backgroundColor": "#f8fafc", "borderBottom": "2px solid #e2e8f0"}
-                },
-                {
-                    "name": "TH_City",
-                    "type": "Paragraph",
-                    "children": "",
-                    "text": "City",
-                    "parentId": "FacilityTable",
-                    "style": {"padding": "12px", "fontWeight": "bold", "backgroundColor": "#f8fafc", "borderBottom": "2px solid #e2e8f0"}
-                },
-                {
-                    "name": "TH_State",
-                    "type": "Paragraph",
-                    "children": "",
-                    "text": "State",
-                    "parentId": "FacilityTable",
-                    "style": {"padding": "12px", "fontWeight": "bold", "backgroundColor": "#f8fafc", "borderBottom": "2px solid #e2e8f0"}
-                },
-                {
-                    "name": "TH_Type",
-                    "type": "Paragraph",
-                    "children": "",
-                    "text": "Type",
-                    "parentId": "FacilityTable",
-                    "style": {"padding": "12px", "fontWeight": "bold", "backgroundColor": "#f8fafc", "borderBottom": "2px solid #e2e8f0"}
-                },
-                {
-                    "name": "TH_Use",
-                    "type": "Paragraph",
-                    "children": "",
-                    "text": "Use",
-                    "parentId": "FacilityTable",
-                    "style": {"padding": "12px", "fontWeight": "bold", "backgroundColor": "#f8fafc", "borderBottom": "2px solid #e2e8f0"}
-                },
-                {
-                    "name": "TH_Ownership",
-                    "type": "Paragraph",
-                    "children": "",
-                    "text": "Ownership",
-                    "parentId": "FacilityTable",
-                    "style": {"padding": "12px", "fontWeight": "bold", "backgroundColor": "#f8fafc", "borderBottom": "2px solid #e2e8f0"}
-                },
-                {
-                    "name": "TH_SqFt",
-                    "type": "Paragraph",
-                    "children": "",
-                    "text": "Sq Ft",
-                    "parentId": "FacilityTable",
-                    "style": {"padding": "12px", "fontWeight": "bold", "backgroundColor": "#f8fafc", "borderBottom": "2px solid #e2e8f0", "textAlign": "right"}
+                    "name": "TableContainer",
+                    "type": "Html",
+                    "html": ""
                 }
             ]
         },
         "inputVariables": []
     }
 
-    # Add table rows dynamically
+    # Build HTML table with single scroll
+    table_html = '''<div style="max-height: 400px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+            <thead style="position: sticky; top: 0; background: #f8fafc;">
+                <tr>
+                    <th style="padding: 12px; font-weight: bold; text-align: left; border-bottom: 2px solid #e2e8f0;">Building Name</th>
+                    <th style="padding: 12px; font-weight: bold; text-align: left; border-bottom: 2px solid #e2e8f0;">City</th>
+                    <th style="padding: 12px; font-weight: bold; text-align: left; border-bottom: 2px solid #e2e8f0;">State</th>
+                    <th style="padding: 12px; font-weight: bold; text-align: left; border-bottom: 2px solid #e2e8f0;">Type</th>
+                    <th style="padding: 12px; font-weight: bold; text-align: left; border-bottom: 2px solid #e2e8f0;">Use</th>
+                    <th style="padding: 12px; font-weight: bold; text-align: left; border-bottom: 2px solid #e2e8f0;">Ownership</th>
+                    <th style="padding: 12px; font-weight: bold; text-align: right; border-bottom: 2px solid #e2e8f0;">Sq Ft</th>
+                </tr>
+            </thead>
+            <tbody>'''
+
     for i, row in enumerate(table_rows):
         bg_color = "#ffffff" if i % 2 == 0 else "#f8fafc"
-        border_style = "1px solid #e2e8f0"
-        layout["layoutJson"]["children"].extend([
-            {"name": f"TD_Name_{i}", "type": "Paragraph", "children": "", "text": row["name"], "parentId": "FacilityTable", "style": {"padding": "10px 12px", "backgroundColor": bg_color, "borderBottom": border_style, "fontSize": "14px"}},
-            {"name": f"TD_City_{i}", "type": "Paragraph", "children": "", "text": row["city"], "parentId": "FacilityTable", "style": {"padding": "10px 12px", "backgroundColor": bg_color, "borderBottom": border_style, "fontSize": "14px"}},
-            {"name": f"TD_State_{i}", "type": "Paragraph", "children": "", "text": row["state"], "parentId": "FacilityTable", "style": {"padding": "10px 12px", "backgroundColor": bg_color, "borderBottom": border_style, "fontSize": "14px"}},
-            {"name": f"TD_Type_{i}", "type": "Paragraph", "children": "", "text": row["type"], "parentId": "FacilityTable", "style": {"padding": "10px 12px", "backgroundColor": bg_color, "borderBottom": border_style, "fontSize": "14px"}},
-            {"name": f"TD_Use_{i}", "type": "Paragraph", "children": "", "text": row["use"], "parentId": "FacilityTable", "style": {"padding": "10px 12px", "backgroundColor": bg_color, "borderBottom": border_style, "fontSize": "14px"}},
-            {"name": f"TD_Ownership_{i}", "type": "Paragraph", "children": "", "text": row["ownership"], "parentId": "FacilityTable", "style": {"padding": "10px 12px", "backgroundColor": bg_color, "borderBottom": border_style, "fontSize": "14px"}},
-            {"name": f"TD_SqFt_{i}", "type": "Paragraph", "children": "", "text": row["sq_ft"], "parentId": "FacilityTable", "style": {"padding": "10px 12px", "backgroundColor": bg_color, "borderBottom": border_style, "fontSize": "14px", "textAlign": "right"}}
-        ])
+        table_html += f'''
+                <tr style="background-color: {bg_color};">
+                    <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0;">{row["name"]}</td>
+                    <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0;">{row["city"]}</td>
+                    <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0;">{row["state"]}</td>
+                    <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0;">{row["type"]}</td>
+                    <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0;">{row["use"]}</td>
+                    <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0;">{row["ownership"]}</td>
+                    <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; text-align: right;">{row["sq_ft"]}</td>
+                </tr>'''
+
+    table_html += '''
+            </tbody>
+        </table>
+    </div>'''
+
+    # Update the TableContainer with the HTML
+    for child in layout["layoutJson"]["children"]:
+        if child.get("name") == "TableContainer":
+            child["html"] = table_html
+            break
 
     # Render layout
     print(f"DEBUG: Layout has {len(layout['layoutJson']['children'])} children")
